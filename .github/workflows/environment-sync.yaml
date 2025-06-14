@@ -1,0 +1,71 @@
+name: Mirror Environment
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_environment:
+        description: 'Source environment'
+        required: true
+        type: choice
+        options:
+          - dev
+          - test
+          - demo
+          - prod
+      destination_environment:
+        description: 'Destination environment'
+        required: true
+        type: choice
+        options:
+          - dev
+          - test
+          - demo
+          - prod
+
+jobs:
+  process-environments:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Validate environments
+        run: |
+          if [ "${{ github.event.inputs.source_environment }}" = "${{ github.event.inputs.destination_environment }}" ]; then
+            echo "Source and destination environments cannot be the same"
+            exit 1
+          fi
+
+      - name: Log environments
+        run: |
+          echo "Source environment: ${{ github.event.inputs.source_environment }}"
+          echo "Destination environment: ${{ github.event.inputs.destination_environment }}"
+
+      - name: Set source environment secrets
+        run: |
+          if [ "${{ github.event.inputs.source_environment }}" = "dev" ]; then
+            echo "SOURCE_SECRETS=${{ secrets.DEV_SECRETS }}" >> $GITHUB_ENV
+          elif [ "${{ github.event.inputs.source_environment }}" = "test" ]; then
+            echo "SOURCE_SECRETS=${{ secrets.TEST_SECRETS }}" >> $GITHUB_ENV
+          elif [ "${{ github.event.inputs.source_environment }}" = "demo" ]; then
+            echo "SOURCE_SECRETS=${{ secrets.DEMO_SECRETS }}" >> $GITHUB_ENV
+          elif [ "${{ github.event.inputs.source_environment }}" = "prod" ]; then
+            echo "SOURCE_SECRETS=${{ secrets.PROD_SECRETS }}" >> $GITHUB_ENV
+          fi
+
+      - name: Set destination environment secrets
+        run: |
+          if [ "${{ github.event.inputs.destination_environment }}" = "dev" ]; then
+            echo "DEST_SECRETS=${{ secrets.DEV_SECRETS }}" >> $GITHUB_ENV
+          elif [ "${{ github.event.inputs.destination_environment }}" = "test" ]; then
+            echo "DEST_SECRETS=${{ secrets.TEST_SECRETS }}" >> $GITHUB_ENV
+          elif [ "${{ github.event.inputs.destination_environment }}" = "demo" ]; then
+            echo "DEST_SECRETS=${{ secrets.DEMO_SECRETS }}" >> $GITHUB_ENV
+          elif [ "${{ github.event.inputs.destination_environment }}" = "prod" ]; then
+            echo "DEST_SECRETS=${{ secrets.PROD_SECRETS }}" >> $GITHUB_ENV
+          fi
+
+      - name: Run bash script
+        run: |
+          echo "Source environment secrets value: ${{ env.SOURCE_SECRETS }}"
+          echo "Destination environment secrets value: ${{ env.DEST_SECRETS }}" 
