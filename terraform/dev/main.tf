@@ -1,4 +1,11 @@
 terraform {
+  backend "remote" {
+    hostname     = "app.terraform.io"
+    organization = "DemoRomitOrg"
+    workspaces {
+      name = "Workflow-Runner"
+    }
+  }
   required_providers {
     local = {
       source  = "hashiCorp/local"
