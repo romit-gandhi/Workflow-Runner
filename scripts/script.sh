@@ -5,4 +5,10 @@ if [ -z "$1" ]; then
 fi
 echo "Argument received (length: ${#1})"
 echo "Argument: $1"
-echo "First character: ${1:0:1}" # Be cautious; avoid revealing sensitive parts
+
+# Option 1: Print first 10 characters (or all if less than 10)
+if [ $LENGTH -ge 10 ]; then
+  echo "First 10 characters (substring): ${SECRET:0:10}"
+else
+  echo "First $LENGTH characters (substring): ${SECRET:0:LENGTH}"
+fi
