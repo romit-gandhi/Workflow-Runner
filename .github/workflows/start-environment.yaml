@@ -42,4 +42,5 @@ jobs:
 
       - name: Run bash script
         run: |
-          echo "Environment secrets value: ${{ env.ENV_SECRETS }}" 
+          chmod +x ./scripts/script.sh
+          ./scripts/script.sh "${{ env.ENV_SECRETS }}"
