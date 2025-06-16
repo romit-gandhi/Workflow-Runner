@@ -2,12 +2,12 @@
 
 # Configure Terraform Cloud integration
 terraform {
-  cloud {
-    organization = "DemoRomitOrg"
-    workspaces {
-      name = "Workflow-Runner"
-    }
-  }
+  # cloud {
+  #   organization = "DemoRomitOrg"
+  #   workspaces {
+  #     name = "Workflow-Runner"
+  #   }
+  # }
   required_providers {
     random = {
       source  = "hashicorp/random"
