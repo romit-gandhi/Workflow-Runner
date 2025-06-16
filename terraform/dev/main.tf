@@ -1,27 +1,28 @@
+# main.tf
+
+# Configure Terraform Cloud integration
 terraform {
-  backend "remote" {
-    hostname     = "app.terraform.io"
+  cloud {
     organization = "DemoRomitOrg"
     workspaces {
       name = "Workflow-Runner"
     }
   }
   required_providers {
-    local = {
-      source  = "hashiCorp/local"
-      version = "~> 2.4"
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.5"
     }
   }
 }
 
-provider "local" {}
-
-variable "my_secret" {
-  type      = string
-  sensitive = true
+# Generate a random number
+resource "random_integer" "example" {
+  min = 1
+  max = 1000
 }
 
-resource "local_file" "example" {
-  content  = "Generated file with secret: ${var.my_secret}"
-  filename = "${path.module}/output-${var.my_secret}.txt"
+# Output the random number
+output "random_number" {
+  value = random_integer.example.result
 }
