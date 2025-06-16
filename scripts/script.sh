@@ -26,5 +26,7 @@ echo "Running terraform version..."
 terraform version
 
 cd terraform/dev
-terraform plan
-terraform apply
+export TF_VAR_my_secret="$SECRET"
+terraform init -input=false
+terraform plan -input=false
+terraform apply -auto-approve -input=false

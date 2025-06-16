@@ -9,14 +9,14 @@ terraform {
 
 provider "local" {}
 
-# variable "my_secret" {
-#   type      = string
-#   sensitive = true # Marks the variable as sensitive to avoid logging
-# }
+variable "my_secret" {
+  type      = string
+  sensitive = true
+}
 
 resource "local_file" "example" {
-  content  = "Generated file with secret: Demo"
-  filename = "${path.module}/output-demo.txt"
+  content  = "Generated file with secret: ${var.my_secret}"
+  filename = "${path.module}/output-${var.my_secret}.txt"
 }
 
 output "file_path" {
