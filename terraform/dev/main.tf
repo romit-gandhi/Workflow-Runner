@@ -18,7 +18,3 @@ resource "local_file" "example" {
   content  = "Generated file with secret: ${var.my_secret}"
   filename = "${path.module}/output-${var.my_secret}.txt"
 }
-
-output "file_path" {
-  value     = local_file.example.filename
-}
