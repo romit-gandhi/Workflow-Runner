@@ -1,9 +1,7 @@
-#!/bin/bash
-
-# Get the argument passed from the workflow
-ARGUMENT=$1
-
-# Example: Print the argument (or process it as needed)
-echo "Received argument: $ARGUMENT"
-
-# Add your script logic here
+# script.sh
+if [ -z "$1" ]; then
+  echo "Error: No argument provided"
+  exit 1
+fi
+echo "Argument received (length: ${#1})"
+echo "Argument: $1"

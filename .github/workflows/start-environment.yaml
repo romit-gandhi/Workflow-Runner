@@ -42,5 +42,6 @@ jobs:
 
       - name: Run bash script
         run: |
+          echo "ENV_SECRETS is set: ${ENV_SECRETS:+github.event.inputs.environment}"
           chmod +x ./scripts/script.sh
           ./scripts/script.sh "${{ env.ENV_SECRETS }}"
