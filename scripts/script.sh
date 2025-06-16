@@ -6,9 +6,15 @@ fi
 echo "Argument received (length: ${#1})"
 echo "Argument: $1"
 
-# Option 1: Print first 10 characters (or all if less than 10)
-if [ $LENGTH -ge 10 ]; then
-  echo "First 10 characters (substring): ${SECRET:0:10}"
-else
-  echo "First $LENGTH characters (substring): ${SECRET:0:LENGTH}"
-fi
+# Get the argument (secret)
+SECRET="$1"
+
+# Get the length of the secret
+LENGTH=${#SECRET}
+echo "Argument length: $LENGTH"
+
+echo "All characters with positions:"
+for ((i=0; i<LENGTH; i++)); do
+  CHAR="${SECRET:$i:1}"
+  echo "Character at position $((i+1)): $CHAR"
+done
