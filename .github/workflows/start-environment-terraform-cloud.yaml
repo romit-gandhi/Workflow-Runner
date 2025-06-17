@@ -28,9 +28,22 @@ jobs:
           cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }} # TFC API Token
 
 
+
       - name: Run Terraform
         run: |
           cd terraform/${{ github.event.inputs.environment }}
+          # Create a backend.tf on the fly for CI mode, or ensure your code has it configured
+          # to use the 'remote' backend pointing to your TFC org and the specific workspace.
+          cat <<EOF > backend.tf
+          terraform {
+            cloud {
+              organization = "DemoRomitOrg"
+              workspaces {
+                name = "Workflow-Runner-Test"
+              }
+            }
+          }
+          EOF
           terraform init -input=false
           terraform plan -input=false
           terraform apply -auto-approve -input=false
