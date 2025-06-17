@@ -1,28 +1,35 @@
-# main.tf
-
-# Configure Terraform Cloud integration
 terraform {
-  # cloud {
-  #   organization = "DemoRomitOrg"
-  #   workspaces {
-  #     name = "Workflow-Runner"
-  #   }
-  # }
   required_providers {
     random = {
       source  = "hashicorp/random"
-      version = "~> 3.5"
+      version = "~> 3.5.1" # Use a recent version
     }
   }
+
+  # This block is OPTIONAL for this simple example if you are using Terraform Cloud directly.
+  # TFC workspaces manage their own backend state by default.
+  # If you were running this locally and wanted to use TFC for state, you'd uncomment this.
+  /*
+  cloud {
+    organization = "your-tfc-organization-name" # Replace with your TFC org name
+
+    workspaces {
+      name = "random-number-demo" # Replace with your desired TFC workspace name
+    }
+  }
+  */
 }
 
-# Generate a random number
-resource "random_integer" "example" {
-  min = 1
-  max = 1000
+provider "random" {
+  # No configuration needed for this provider
 }
 
-# Output the random number
-output "random_number" {
-  value = random_integer.example.result
+resource "random_pet" "server_name" {
+  length    = var.name_length
+  separator = "-"
+}
+
+output "generated_pet_name" {
+  value       = random_pet.server_name.id
+  description = "A randomly generated pet name for a server."
 }
