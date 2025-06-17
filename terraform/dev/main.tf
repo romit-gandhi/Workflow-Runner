@@ -9,13 +9,13 @@ terraform {
   # This block is OPTIONAL for this simple example if you are using Terraform Cloud directly.
   # TFC workspaces manage their own backend state by default.
   # If you were running this locally and wanted to use TFC for state, you'd uncomment this.
-  cloud {
-    organization = "DemoRomitOrg" # Replace with your TFC org name
+  # cloud {
+  #   organization = "DemoRomitOrg" # Replace with your TFC org name
 
-    workspaces {
-      name = "Workflow-Runner" # Replace with your desired TFC workspace name
-    }
-  }
+  #   workspaces {
+  #     name = "Workflow-Runner" # Replace with your desired TFC workspace name
+  #   }
+  # }
   
 }
 
