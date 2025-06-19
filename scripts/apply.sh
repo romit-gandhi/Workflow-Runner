@@ -66,7 +66,7 @@ echo ""
 echo "Script completed successfully!"
 
 
-cd ../scripts
+cd ../../scripts
 
 # Run JavaScript file if it exists
 JS_FILE="/deploy.js"
