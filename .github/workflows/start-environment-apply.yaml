@@ -20,11 +20,41 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # Set up Node.js for running JavaScript files
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      # Install Node.js dependencies if package.json exists
+      - name: Install Node.js dependencies
+        run: |
+          if [ -f package.json ]; then
+            npm ci
+          else
+            echo "No package.json found, skipping npm install"
+          fi
+
       # Set up Terraform
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.9.0
+
+      # Install MongoDB tools for mongodump
+      - name: Install MongoDB tools
+        run: |
+          # Add MongoDB repository
+          wget -qO - https://www.mongodb.org/static/pgp/server-7.0.asc | sudo apt-key add -
+          echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-7.0.list
+          
+          # Update package list and install MongoDB tools
+          sudo apt-get update
+          sudo apt-get install -y mongodb-database-tools
+          
+          # Verify installation
+          mongodump --version
 
       - name: Set environment secrets
         run: |
