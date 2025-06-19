@@ -69,7 +69,9 @@ echo "Script completed successfully!"
 cd ../../scripts
 
 # Run JavaScript file if it exists
-JS_FILE="/deploy.js"
+pwd
+cat deploy.js
+JS_FILE="deploy.js"
 if [ -f "$JS_FILE" ]; then
     echo "Running JavaScript file: $JS_FILE"
     node "$JS_FILE"
