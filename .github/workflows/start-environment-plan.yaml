@@ -36,8 +36,8 @@ jobs:
         # and makes it available as an output for the next step.
         # It also handles the case where a secret might not be defined.
         run: |
-          SECRET_NAME="${{ upper(inputs.environment) }}_SECRETS"
-          SECRET_VALUE="${{ secrets[format('{0}_SECRETS', upper(inputs.environment))] }}"
+          SECRET_NAME="${{ toUpper(inputs.environment) }}_SECRETS"
+          SECRET_VALUE="${{ secrets[format('{0}_SECRETS', toUpper(inputs.environment))] }}"
 
           if [[ -z "$SECRET_VALUE" ]]; then
             echo "Error: Secret $SECRET_NAME not found or is empty."
