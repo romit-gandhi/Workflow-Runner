@@ -60,6 +60,8 @@ while IFS= read -r line; do
     fi
 done < "$TFVARS_FILE"
 
+cd "environments/$ENVIRONMENT"
+pwd
 # Optional: Initialize and plan Terraform
 echo ""
 echo "Initializing Terraform..."
