@@ -69,7 +69,7 @@ terraform init
 
 echo ""
 echo "Running Terraform plan..."
-terraform plan -var-file="$TFVARS_FILE"
+terraform plan
 
 echo ""
 echo "Script completed successfully!"
