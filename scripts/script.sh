@@ -60,9 +60,14 @@ while IFS= read -r line; do
     fi
 done < "$TFVARS_FILE"
 
+
+cat "$TFVARS_FILE"
+
+echo "*-*-*-*-*-*-*-*-*-"
 echo $TF_VAR_AUTH0_DOMAIN
 echo $TF_VAR_AUTH0_CLIENT_ID
 echo $TF_VAR_AUTH0_CLIENT_SECRET
+echo "*-*-*-*-*-*-*-*-*-"
 
 cd "environments/$ENVIRONMENT"
 pwd
