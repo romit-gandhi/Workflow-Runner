@@ -60,6 +60,10 @@ while IFS= read -r line; do
     fi
 done < "$TFVARS_FILE"
 
+echo $TF_VAR_AUTH0_DOMAIN
+echo $TF_VAR_AUTH0_CLIENT_ID
+echo $TF_VAR_AUTH0_CLIENT_SECRET
+
 cd "environments/$ENVIRONMENT"
 pwd
 # Optional: Initialize and plan Terraform
