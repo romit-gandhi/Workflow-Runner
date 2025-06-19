@@ -63,13 +63,19 @@ done < "$TFVARS_FILE"
 cd "environments/$ENVIRONMENT"
 pwd
 # Optional: Initialize and plan Terraform
-echo ""
-echo "Initializing Terraform..."
-terraform init
 
-echo ""
+echo "Initializing Terraform..."
+terraform init -input=false
+
+echo "Terraform Plan"
 echo "Running Terraform plan..."
-terraform plan
+
+terraform plan -input=false
+
+echo "Terraform Apply"
+echo "Running Terraform apply..."
+
+terraform apply -auto-approve -input=false
 
 echo ""
 echo "Script completed successfully!"
