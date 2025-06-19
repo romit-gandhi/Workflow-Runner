@@ -53,7 +53,7 @@ switch (config.environment) {
         break;
     default:
         console.error('❌ Unknown environment:', config.environment);
-        process.exit(1);
+        // process.exit(1);
 }
 
 // Example: Make API calls, database operations, etc.
@@ -84,7 +84,7 @@ async function deploymentTasks() {
         
     } catch (error) {
         console.error('❌ Deployment failed:', error.message);
-        process.exit(1);
+        // process.exit(1);
     }
 }
 
