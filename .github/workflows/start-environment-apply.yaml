@@ -29,60 +29,25 @@ jobs:
       - name: Log environments
         run: |
           echo "Environment: ${{ github.event.inputs.environment }}"
+          echo "DEV_SECRETS: ${{ secrets.DEV_SECRETS }}"
+          echo "TEST_SECRETS: ${{ secrets.TEST_SECRETS }}"
+          echo "DEMO_SECRETS: ${{ secrets.DEMO_SECRETS }}"
+          echo "PROD_SECRETS: ${{ secrets.PROD_SECRETS }}"
 
-      - name: Set Environment Secrets JSON
-        id: set_secrets
-        # This step ensures the correct secret JSON is loaded based on the input
-        # and makes it available as an output for the next step.
-        # It also handles the case where a secret might not be defined.
+      - name: Set environment secrets
         run: |
-          SECRET_NAME="${{ upper(inputs.environment) }}_SECRETS"
-          SECRET_VALUE="${{ secrets[format('{0}_SECRETS', upper(inputs.environment))] }}"
-
-          if [[ -z "$SECRET_VALUE" ]]; then
-            echo "Error: Secret $SECRET_NAME not found or is empty."
-            exit 1
+          if [ "${{ github.event.inputs.environment }}" = "dev" ]; then
+            echo "ENV_SECRETS=${{ secrets.DEV_SECRETS }}" >> $GITHUB_ENV
+          elif [ "${{ github.event.inputs.environment }}" = "test" ]; then
+            echo "ENV_SECRETS=${{ secrets.TEST_SECRETS }}" >> $GITHUB_ENV
+          elif [ "${{ github.event.inputs.environment }}" = "demo" ]; then
+            echo "ENV_SECRETS=${{ secrets.DEMO_SECRETS }}" >> $GITHUB_ENV
+          elif [ "${{ github.event.inputs.environment }}" = "prod" ]; then
+            echo "ENV_SECRETS=${{ secrets.PROD_SECRETS }}" >> $GITHUB_ENV
           fi
-          echo "secrets_json=$SECRET_VALUE" >> $GITHUB_OUTPUT
 
-      - name: Prepare Terraform Variables and Run Terraform
-        env:
-          # Get the JSON string from the previous step's output
-          SECRETS_JSON_PAYLOAD: ${{ steps.set_secrets.outputs.secrets_json }}
-          # For Terraform to know which workspace to use, if you use them
-          TF_WORKSPACE: ${{ inputs.environment }}
-        shell: bash
+      - name: Run bash script
         run: |
-          echo "Selected environment: ${{ inputs.environment }}"
-          echo "Processing secrets for Terraform..."
-
-          if [[ -z "$SECRETS_JSON_PAYLOAD" ]]; then
-            echo "Error: SECRETS_JSON_PAYLOAD is empty. This shouldn't happen if previous step succeeded."
-            exit 1
-          fi
-
-          # Use jq to parse the JSON and export each key-value pair as TF_VAR_
-          # The -r flag removes quotes from string values.
-          # 'to_entries[]' converts the JSON object into an array of {key: "...", value: "..."} objects.
-          # We then format each into 'export TF_VAR_key="value"'
-          # The `eval` command executes these export statements.
-          # Using @sh for value ensures it's properly shell-escaped.
-          eval $(echo "$SECRETS_JSON_PAYLOAD" | jq -r 'to_entries[] | "export TF_VAR_\(.key)=\(.value|@sh)"')
-
-          # --- Verify (Optional, for debugging - sensitive values will be masked by GitHub Actions) ---
-          echo "--- Verifying TF_VARs (sensitive values will be masked) ---"
-          echo "TF_VAR_auth0_domain: $TF_VAR_auth0_domain"
-          echo "TF_VAR_client_id: $TF_VAR_client_id"
-          echo "TF_VAR_client_secret should be set (will be masked)."
-          # Check if client_secret is set (it will print '***' if it is)
-          if [ -n "$TF_VAR_client_secret" ]; then
-            echo "TF_VAR_client_secret is set."
-          else
-            echo "TF_VAR_client_secret is NOT set."
-          fi
-          echo "---------------------------------------------------------"
-          
-          cd environments/${{ inputs.environment }}
-
-          echo "Running Terraform Apply..."
-          terraform apply -input=false -auto-approve
+          echo "ENV_SECRETS is set: ${ENV_SECRETS:+github.event.inputs.environment}"
+          chmod +x ./scripts/script.sh
+          ./scripts/script.sh "${{ env.ENV_SECRETS }}"
