@@ -64,5 +64,5 @@ jobs:
           echo "Running script with secrets for environment: $ENVIRONMENT"
           
           # Make script executable and run it with the complete JSON and environment
-          chmod +x ./scripts/script.sh
-          ./scripts/script.sh "$ENV_SECRETS_JSON" "$ENVIRONMENT"
+          chmod +x ./scripts/plan.sh
+          ./scripts/plan.sh "$ENV_SECRETS_JSON" "$ENVIRONMENT"

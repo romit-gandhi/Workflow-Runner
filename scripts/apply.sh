@@ -39,22 +39,8 @@ while IFS="=" read -r key value; do
     echo "  ✓ $tf_var_name"
 done < <(echo "$JSON_SECRETS" | jq -r 'to_entries[] | "\(.key)=\(.value)"')
 
-echo "*-*-*-*-*-*-*-*-*-"
-echo "Sample variables:"
-echo "TF_VAR_auth0_domain: $TF_VAR_auth0_domain"
-echo "TF_VAR_client_id: $TF_VAR_auth0_client_id"
-echo "TF_VAR_client_secret: $TF_VAR_auth0_client_secret"
-echo "*-*-*-*-*-*-*-*-*-"
 
 cd "environments/$ENVIRONMENT"
-pwd
-
-echo "Initializing Terraform..."
-terraform init -input=false
-
-echo "Terraform Plan"
-echo "Running Terraform plan..."
-terraform plan -input=false
 
 echo "Terraform Apply"
 echo "Running Terraform apply..."

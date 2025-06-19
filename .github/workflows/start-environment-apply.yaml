@@ -26,28 +26,43 @@ jobs:
         with:
           terraform_version: 1.9.0
 
-      - name: Log environments
-        run: |
-          echo "Environment: ${{ github.event.inputs.environment }}"
-          echo "DEV_SECRETS: ${{ secrets.DEV_SECRETS }}"
-          echo "TEST_SECRETS: ${{ secrets.TEST_SECRETS }}"
-          echo "DEMO_SECRETS: ${{ secrets.DEMO_SECRETS }}"
-          echo "PROD_SECRETS: ${{ secrets.PROD_SECRETS }}"
-
       - name: Set environment secrets
         run: |
-          if [ "${{ github.event.inputs.environment }}" = "dev" ]; then
-            echo "ENV_SECRETS=${{ secrets.DEV_SECRETS }}" >> $GITHUB_ENV
-          elif [ "${{ github.event.inputs.environment }}" = "test" ]; then
-            echo "ENV_SECRETS=${{ secrets.TEST_SECRETS }}" >> $GITHUB_ENV
-          elif [ "${{ github.event.inputs.environment }}" = "demo" ]; then
-            echo "ENV_SECRETS=${{ secrets.DEMO_SECRETS }}" >> $GITHUB_ENV
-          elif [ "${{ github.event.inputs.environment }}" = "prod" ]; then
-            echo "ENV_SECRETS=${{ secrets.PROD_SECRETS }}" >> $GITHUB_ENV
+          # Select the appropriate secret based on environment
+          case "${{ github.event.inputs.environment }}" in
+            "dev")
+              ENV_SECRETS='${{ secrets.DEV_SECRETS }}'
+              ;;
+            "test")
+              ENV_SECRETS='${{ secrets.TEST_SECRETS }}'
+              ;;
+            "demo")
+              ENV_SECRETS='${{ secrets.DEMO_SECRETS }}'
+              ;;
+            "prod")
+              ENV_SECRETS='${{ secrets.PROD_SECRETS }}'
+              ;;
+            *)
+              echo "Error: Invalid environment specified"
+              exit 1
+              ;;
+          esac
+          
+          # Validate that ENV_SECRETS is not empty
+          if [ -z "$ENV_SECRETS" ] || [ "$ENV_SECRETS" = "null" ]; then
+            echo "Error: No secrets found for environment ${{ github.event.inputs.environment }}"
+            exit 1
           fi
+          
+          # Set environment variables for the next step
+          echo "ENVIRONMENT=${{ github.event.inputs.environment }}" >> $GITHUB_ENV
+          echo "ENV_SECRETS_JSON=$ENV_SECRETS" >> $GITHUB_ENV
 
       - name: Run bash script
         run: |
-          echo "ENV_SECRETS is set: ${ENV_SECRETS:+github.event.inputs.environment}"
-          chmod +x ./scripts/script.sh
-          ./scripts/script.sh "${{ env.ENV_SECRETS }}"
+          echo "Environment: $ENVIRONMENT"
+          echo "Running script with secrets for environment: $ENVIRONMENT"
+          
+          # Make script executable and run it with the complete JSON and environment
+          chmod +x ./scripts/apply.sh
+          ./scripts/apply.sh "$ENV_SECRETS_JSON" "$ENVIRONMENT"
