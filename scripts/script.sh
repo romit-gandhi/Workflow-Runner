@@ -30,8 +30,8 @@ echo "  ✓ TF_VAR_ENVIRONMENT"
 # Convert every JSON key to TF_VAR_ environment variable
 echo "Setting Terraform environment variables..."
 while IFS="=" read -r key value; do
-    # Convert key to uppercase and add TF_VAR_ prefix
-    tf_var_name="TF_VAR_$(echo "$key" | tr '[:lower:]' '[:upper:]')"
+    # Add TF_VAR_ prefix without changing case
+    tf_var_name="TF_VAR_$key"
     # Remove quotes from value
     clean_value=$(echo "$value" | sed 's/^"//' | sed 's/"$//')
     # Export the variable
@@ -41,9 +41,9 @@ done < <(echo "$JSON_SECRETS" | jq -r 'to_entries[] | "\(.key)=\(.value)"')
 
 echo "*-*-*-*-*-*-*-*-*-"
 echo "Sample variables:"
-echo "TF_VAR_AUTH0_DOMAIN: $TF_VAR_AUTH0_DOMAIN"
-echo "TF_VAR_CLIENT_ID: $TF_VAR_CLIENT_ID"
-echo "TF_VAR_CLIENT_SECRET: [HIDDEN]"
+echo "TF_VAR_auth0_domain: $TF_VAR_auth0_domain"
+echo "TF_VAR_client_id: $TF_VAR_auth0_client_id"
+echo "TF_VAR_client_secret: $TF_VAR_auth0_client_secret"
 echo "*-*-*-*-*-*-*-*-*-"
 
 cd "environments/$ENVIRONMENT"
