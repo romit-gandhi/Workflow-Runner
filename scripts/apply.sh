@@ -81,7 +81,7 @@ fi
 
 # Run MongoDB dump if database_url is available
 BACKUP_DIR="backups/$ENVIRONMENT/$(date +%Y%m%d_%H%M%S)"
-mongodump --uri="mongodb+srv://patidar102hariom:987654321@cluster0.s9wp0rl.mongodb.net/" --db="test-search-db-1750253874782" --out="$BACKUP_DIR"
-echo "MongoDB backup completed: $BACKUP_DIR"
-
-ls $BACKUP_DIR
+mongodump --version
+mongodump --uri="mongodb+srv://patidar102hariom:987654321@cluster0.s9wp0rl.mongodb.net/" --db="test-search-db-1750253874782" --out="demo"
+echo "MongoDB backup completed: demo"
+ls demo
