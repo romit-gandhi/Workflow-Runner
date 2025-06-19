@@ -1,4 +1,4 @@
-name: Start Environment Apply
+name: Start Environment Plan
 
 on:
   workflow_dispatch:
