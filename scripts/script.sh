@@ -1,86 +1,73 @@
 #!/bin/bash
 
-# script.sh - Deploy infrastructure using Terraform
+# script.sh - Process environment secrets and convert to Terraform variables
+# Usage: ./script.sh "<JSON_SECRETS>" "<ENVIRONMENT>"
+
 set -e  # Exit on any error
 
-# Validate arguments
-if [ $# -ne 4 ]; then
-  echo "Error: Expected 4 arguments (auth0_domain, client_id, client_secret, environment)"
-  echo "Usage: $0 <auth0_domain> <client_id> <client_secret> <environment>"
-  exit 1
+# Check if required arguments are provided
+if [ $# -ne 2 ]; then
+    echo "Error: Script requires exactly 2 arguments"
+    echo "Usage: $0 '<JSON_SECRETS>' '<ENVIRONMENT>'"
+    exit 1
 fi
 
-# Get the arguments
-AUTH0_DOMAIN="$1"
-CLIENT_ID="$2"
-CLIENT_SECRET="$3"
-ENVIRONMENT="$4"
+JSON_SECRETS="$1"
+ENVIRONMENT="$2"
 
-# Validate required arguments are not empty
-if [ -z "$AUTH0_DOMAIN" ] || [ -z "$CLIENT_ID" ] || [ -z "$CLIENT_SECRET" ] || [ -z "$ENVIRONMENT" ]; then
-  echo "Error: All arguments must be non-empty"
-  exit 1
+echo "Processing secrets for environment: $ENVIRONMENT"
+
+# Validate JSON format
+if ! echo "$JSON_SECRETS" | jq empty 2>/dev/null; then
+    echo "Error: Invalid JSON format in secrets"
+    exit 1
 fi
 
-echo "========================================="
-echo "Starting deployment for environment: $ENVIRONMENT"
-echo "========================================="
-echo "Auth0 Domain: $AUTH0_DOMAIN"
-echo "Client ID: $CLIENT_ID"
-echo "Client Secret: [HIDDEN]"
-echo "========================================="
+# Create terraform.tfvars file
+TFVARS_FILE="terraform.tfvars"
+echo "# Auto-generated terraform variables for $ENVIRONMENT environment" > "$TFVARS_FILE"
+echo "# Generated on: $(date)" >> "$TFVARS_FILE"
+echo "" >> "$TFVARS_FILE"
 
-# Set Terraform variables
-export TF_VAR_auth0_domain="$AUTH0_DOMAIN"
-export TF_VAR_client_id="$CLIENT_ID"
-export TF_VAR_client_secret="$CLIENT_SECRET"
-export TF_VAR_environment="$ENVIRONMENT"
+# Add environment variable
+echo "environment = \"$ENVIRONMENT\"" >> "$TFVARS_FILE"
+echo "" >> "$TFVARS_FILE"
 
-# Additional environment variables that might be useful
-export TF_IN_AUTOMATION=true
-export TF_INPUT=false
+# Parse JSON and convert each key-value pair to terraform variable
+echo "$JSON_SECRETS" | jq -r 'to_entries[] | "\(.key) = \"\(.value)\""' >> "$TFVARS_FILE"
 
-# Run terraform version command
-echo "Checking Terraform version..."
-terraform version
+echo "Terraform variables file created: $TFVARS_FILE"
+echo "Variables generated:"
 
-# Check if terraform directory exists
-TERRAFORM_DIR="terraform/$ENVIRONMENT"
-if [ ! -d "$TERRAFORM_DIR" ]; then
-  echo "Error: Terraform directory '$TERRAFORM_DIR' does not exist"
-  exit 1
-fi
+# Display the generated variables (hide sensitive values)
+while IFS= read -r line; do
+    if [[ $line == *"="* ]] && [[ $line != "#"* ]]; then
+        key=$(echo "$line" | cut -d'=' -f1 | xargs)
+        echo "  ✓ $key"
+    fi
+done < "$TFVARS_FILE"
 
-# Navigate to the appropriate terraform directory based on environment
-echo "Navigating to $TERRAFORM_DIR..."
-cd "$TERRAFORM_DIR"
+# Optional: Create environment variables for current shell session
+echo ""
+echo "Setting environment variables..."
+while IFS= read -r line; do
+    if [[ $line == *"="* ]] && [[ $line != "#"* ]]; then
+        # Convert terraform format to environment variable format
+        key=$(echo "$line" | cut -d'=' -f1 | xargs | tr '[:lower:]' '[:upper:]')
+        value=$(echo "$line" | cut -d'=' -f2- | xargs | sed 's/^"//' | sed 's/"$//')
+        export "TF_VAR_$key=$value"
+        echo "  ✓ TF_VAR_$key"
+    fi
+done < "$TFVARS_FILE"
 
-# Verify terraform configuration
-echo "Validating Terraform configuration..."
-terraform fmt -check=true -diff=true || {
-  echo "Warning: Terraform files are not properly formatted"
-  terraform fmt
-}
-
-# Initialize terraform
+# Optional: Initialize and plan Terraform
+echo ""
 echo "Initializing Terraform..."
-terraform init -input=false -upgrade
+terraform init
 
-# Validate terraform configuration
-echo "Validating Terraform configuration..."
-terraform validate
+echo ""
+echo "Running Terraform plan..."
+terraform plan -var-file="$TFVARS_FILE"
 
-# Create terraform plan
-echo "Creating Terraform plan..."
-terraform plan -input=false -out=tfplan
-
-# Apply terraform plan
-echo "Applying Terraform plan..."
-terraform apply -input=false -auto-approve tfplan
-
-# Clean up plan file
-rm -f tfplan
-
-echo "========================================="
-echo "Deployment completed successfully!"
-echo "========================================="
+echo ""
+echo "Script completed successfully!"

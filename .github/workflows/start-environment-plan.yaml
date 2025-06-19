@@ -26,7 +26,7 @@ jobs:
         with:
           terraform_version: 1.9.0
 
-      - name: Set environment secrets and parse JSON
+      - name: Set environment secrets
         run: |
           # Select the appropriate secret based on environment
           case "${{ github.event.inputs.environment }}" in
@@ -54,36 +54,15 @@ jobs:
             exit 1
           fi
           
-          # Parse JSON and extract individual values with error handling
-          AUTH0_DOMAIN=$(echo "$ENV_SECRETS" | jq -r '.auth0_domain // empty')
-          CLIENT_ID=$(echo "$ENV_SECRETS" | jq -r '.client_id // empty')
-          CLIENT_SECRET=$(echo "$ENV_SECRETS" | jq -r '.client_secret // empty')
-          
-          # Validate that all required fields are present
-          if [ -z "$AUTH0_DOMAIN" ] || [ -z "$CLIENT_ID" ] || [ -z "$CLIENT_SECRET" ]; then
-            echo "Error: Missing required fields in secrets JSON"
-            echo "AUTH0_DOMAIN: $([ -n "$AUTH0_DOMAIN" ] && echo "✓" || echo "✗")"
-            echo "CLIENT_ID: $([ -n "$CLIENT_ID" ] && echo "✓" || echo "✗")"
-            echo "CLIENT_SECRET: $([ -n "$CLIENT_SECRET" ] && echo "✓" || echo "✗")"
-            exit 1
-          fi
-          
-          # Set as environment variables for the next step
-          echo "AUTH0_DOMAIN=$AUTH0_DOMAIN" >> $GITHUB_ENV
-          echo "CLIENT_ID=$CLIENT_ID" >> $GITHUB_ENV
-          echo "CLIENT_SECRET=$CLIENT_SECRET" >> $GITHUB_ENV
+          # Set environment variables for the next step
           echo "ENVIRONMENT=${{ github.event.inputs.environment }}" >> $GITHUB_ENV
-          
-          # Also set the complete JSON for the script if needed
           echo "ENV_SECRETS_JSON=$ENV_SECRETS" >> $GITHUB_ENV
 
       - name: Run bash script
         run: |
           echo "Environment: $ENVIRONMENT"
-          echo "AUTH0_DOMAIN: $AUTH0_DOMAIN"
-          echo "CLIENT_ID: $CLIENT_ID"
-          echo "CLIENT_SECRET: [HIDDEN]"
+          echo "Running script with secrets for environment: $ENVIRONMENT"
           
-          # Make script executable and run it
-          # chmod +x ./scripts/script.sh
-          # ./scripts/script.sh "$AUTH0_DOMAIN" "$CLIENT_ID" "$CLIENT_SECRET" "$ENVIRONMENT"
+          # Make script executable and run it with the complete JSON and environment
+          chmod +x ./scripts/script.sh
+          ./scripts/script.sh "$ENV_SECRETS_JSON" "$ENVIRONMENT"
