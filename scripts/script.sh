@@ -23,65 +23,41 @@ if ! echo "$JSON_SECRETS" | jq empty 2>/dev/null; then
     exit 1
 fi
 
-# Create terraform.tfvars file
-TFVARS_FILE="terraform.tfvars"
-echo "# Auto-generated terraform variables for $ENVIRONMENT environment" > "$TFVARS_FILE"
-echo "# Generated on: $(date)" >> "$TFVARS_FILE"
-echo "" >> "$TFVARS_FILE"
+# Set environment variable for environment
+export TF_VAR_ENVIRONMENT="$ENVIRONMENT"
+echo "  ✓ TF_VAR_ENVIRONMENT"
 
-# Add environment variable
-echo "environment = \"$ENVIRONMENT\"" >> "$TFVARS_FILE"
-echo "" >> "$TFVARS_FILE"
-
-# Parse JSON and convert each key-value pair to terraform variable
-echo "$JSON_SECRETS" | jq -r 'to_entries[] | "\(.key) = \"\(.value)\""' >> "$TFVARS_FILE"
-
-echo "Terraform variables file created: $TFVARS_FILE"
-echo "Variables generated:"
-
-# Display the generated variables (hide sensitive values)
-while IFS= read -r line; do
-    if [[ $line == *"="* ]] && [[ $line != "#"* ]]; then
-        key=$(echo "$line" | cut -d'=' -f1 | xargs)
-        echo "  ✓ $key"
-    fi
-done < "$TFVARS_FILE"
-
-# Optional: Create environment variables for current shell session
-echo ""
-echo "Setting environment variables..."
-while IFS= read -r line; do
-    # Convert terraform format to environment variable format
-    key=$(echo "$line" | cut -d'=' -f1 | xargs | tr '[:lower:]' '[:upper:]')
-    value=$(echo "$line" | cut -d'=' -f2- | xargs | sed 's/^"//' | sed 's/"$//')
-    export "TF_VAR_$key=$value"
-    echo "  ✓ TF_VAR_$key"
-done < "$TFVARS_FILE"
-
-
-cat "$TFVARS_FILE"
+# Convert every JSON key to TF_VAR_ environment variable
+echo "Setting Terraform environment variables..."
+while IFS="=" read -r key value; do
+    # Convert key to uppercase and add TF_VAR_ prefix
+    tf_var_name="TF_VAR_$(echo "$key" | tr '[:lower:]' '[:upper:]')"
+    # Remove quotes from value
+    clean_value=$(echo "$value" | sed 's/^"//' | sed 's/"$//')
+    # Export the variable
+    export "$tf_var_name=$clean_value"
+    echo "  ✓ $tf_var_name"
+done < <(echo "$JSON_SECRETS" | jq -r 'to_entries[] | "\(.key)=\(.value)"')
 
 echo "*-*-*-*-*-*-*-*-*-"
-echo $TF_VAR_AUTH0_DOMAIN
-echo $TF_VAR_AUTH0_CLIENT_ID
-echo $TF_VAR_AUTH0_CLIENT_SECRET
+echo "Sample variables:"
+echo "TF_VAR_AUTH0_DOMAIN: $TF_VAR_AUTH0_DOMAIN"
+echo "TF_VAR_CLIENT_ID: $TF_VAR_CLIENT_ID"
+echo "TF_VAR_CLIENT_SECRET: [HIDDEN]"
 echo "*-*-*-*-*-*-*-*-*-"
 
 cd "environments/$ENVIRONMENT"
 pwd
-# Optional: Initialize and plan Terraform
 
 echo "Initializing Terraform..."
 terraform init -input=false
 
 echo "Terraform Plan"
 echo "Running Terraform plan..."
-
 terraform plan -input=false
 
 echo "Terraform Apply"
 echo "Running Terraform apply..."
-
 terraform apply -auto-approve -input=false
 
 echo ""
