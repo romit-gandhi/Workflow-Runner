@@ -81,9 +81,8 @@ jobs:
             echo "TF_VAR_client_secret is NOT set."
           fi
           echo "---------------------------------------------------------"
+          
+          cd environments/${{ inputs.environment }}
 
-      # - name: Run bash script
-      #   run: |
-      #     echo "ENV_SECRETS is set: ${ENV_SECRETS:+github.event.inputs.environment}"
-      #     chmod +x ./scripts/script.sh
-      #     ./scripts/script.sh "${{ env.ENV_SECRETS }}"
+          echo "Running Terraform Apply..."
+          terraform apply -input=false -auto-approve
