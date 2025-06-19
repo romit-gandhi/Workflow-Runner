@@ -51,13 +51,11 @@ done < "$TFVARS_FILE"
 echo ""
 echo "Setting environment variables..."
 while IFS= read -r line; do
-    if [[ $line == *"="* ]] && [[ $line != "#"* ]]; then
-        # Convert terraform format to environment variable format
-        key=$(echo "$line" | cut -d'=' -f1 | xargs | tr '[:lower:]' '[:upper:]')
-        value=$(echo "$line" | cut -d'=' -f2- | xargs | sed 's/^"//' | sed 's/"$//')
-        export "TF_VAR_$key=$value"
-        echo "  ✓ TF_VAR_$key"
-    fi
+    # Convert terraform format to environment variable format
+    key=$(echo "$line" | cut -d'=' -f1 | xargs | tr '[:lower:]' '[:upper:]')
+    value=$(echo "$line" | cut -d'=' -f2- | xargs | sed 's/^"//' | sed 's/"$//')
+    export "TF_VAR_$key=$value"
+    echo "  ✓ TF_VAR_$key"
 done < "$TFVARS_FILE"
 
 
