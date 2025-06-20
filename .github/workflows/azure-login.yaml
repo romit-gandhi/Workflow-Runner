@@ -1,0 +1,58 @@
+name: Start Environment Plan
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        type: choice
+        options:
+          - dev
+          - test
+          - demo
+          - prod
+
+jobs:
+  process-environment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Set up Terraform
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.0
+
+      - name: Set environment secrets
+        run: |
+          # Select the appropriate secret based on environment
+          case "${{ github.event.inputs.environment }}" in
+            "dev")
+              ENV_SECRETS='${{ secrets.DEV_AZURE_CREDENTIALS }}'
+              ;;
+            "test")
+              ENV_SECRETS='${{ secrets.TEST_AZURE_CREDENTIALS }}'
+              ;;
+            "demo")
+              ENV_SECRETS='${{ secrets.DEMO_AZURE_CREDENTIALS }}'
+              ;;
+            "prod")
+              ENV_SECRETS='${{ secrets.PROD_AZURE_CREDENTIALS }}'
+              ;;
+            *)
+              echo "Error: Invalid environment specified"
+              exit 1
+              ;;
+          esac
+
+      - name: "Login to cluster"
+        uses: azure/login@cb79c773a3cfa27f31f25eb3f677781210c9ce3d
+        with:
+          creds: "${{ secrets.DEV_AZURE_CREDENTIALS }}"
+
+      - name: Run bash script
+        run: |
+          az version
