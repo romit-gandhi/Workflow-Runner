@@ -57,3 +57,4 @@ jobs:
       - name: Run bash script
         run: |
           az version
+          az aks command invoke --resource-group "terraform-k8s-setup" --name "terraform-k8s-setup" --command "kubectl get all -n backend"
