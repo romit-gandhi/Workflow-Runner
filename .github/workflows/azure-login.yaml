@@ -1,4 +1,4 @@
-name: Start Environment Plan
+name: Azure Login
 
 on:
   workflow_dispatch:
