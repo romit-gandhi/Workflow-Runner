@@ -57,4 +57,14 @@ jobs:
       - name: Run bash script
         run: |
           az version
-          az aks command invoke --resource-group "terraform-k8s-setup" --name "terraform-k8s-setup" --command "kubectl get all -n backend"
+
+          SUBSCRIPTION_ID=$(az account show --query id --output tsv)
+          echo "Current Subscription ID: $SUBSCRIPTION_ID"
+          echo "ARM_SUBSCRIPTION_ID=$SUBSCRIPTION_ID" >> $GITHUB_ENV
+          export TF_VAR_subscription_id=$SUBSCRIPTION_ID
+
+          cd terraform/dev
+          terraform init -input=false
+          terraform plan -input=false
+          terraform apply -auto-approve -input=false
+

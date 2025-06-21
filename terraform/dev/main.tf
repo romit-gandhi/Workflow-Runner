@@ -4,6 +4,10 @@ terraform {
       source  = "hashicorp/random"
       version = "~> 3.5.1" # Use a recent version
     }
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = "~> 4.32.0"
+    }
   }
 
   # This block is OPTIONAL for this simple example if you are using Terraform Cloud directly.
@@ -21,6 +25,16 @@ terraform {
 
 provider "random" {
   # No configuration needed for this provider
+}
+
+provider "azurerm" {
+  features {}
+  subscription_id = var.subscription_id
+}
+
+resource "azurerm_resource_group" "rg" {
+  name     = "my-terraform-azure-login-rg" # This will be the actual name of the RG in Azure
+  location = "East US"         # Choose an Azure region that makes sense for you
 }
 
 resource "random_pet" "server_name" {

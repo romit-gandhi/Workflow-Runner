@@ -4,25 +4,9 @@ variable "name_length" {
   default     = 2
 }
 
-variable "auth0_domain" {
-  description = "Auth0 domain URL"
+variable "subscription_id" {
+  description = "The Azure subscription ID"
   type        = string
-  sensitive   = true
 }
 
-variable "client_id" {
-  description = "Auth0 client ID"
-  type        = string
-  sensitive   = true
-}
 
-variable "client_secret" {
-  description = "Auth0 client secret"
-  type        = string
-  sensitive   = true
-}
-
-variable "environment" {
-  description = "Environment name (dev, test, demo, prod)"
-  type        = string
-}
